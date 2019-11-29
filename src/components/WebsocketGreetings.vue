@@ -95,6 +95,7 @@ export default {
       this.stompClient = Stomp.over(this.socket);
       this.stompClient.connect(
         {},
+
         frame => {
           this.connected = true;
           console.log(frame);
