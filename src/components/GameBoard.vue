@@ -35,7 +35,7 @@ export default {
     };
   },
   created() {
-    this.socket = new SockJS("http://localhost:8081/snake");
+    this.socket = new SockJS("http://localhost:8090/snake");
     this.stompClient = Stomp.over(this.socket);
   },
   mounted() {
@@ -46,16 +46,17 @@ export default {
       {},
       () => {
         this.connected = true;
-        this.stompClient.subscribe("/topic/location", tick => {
-          this.position = JSON.parse(tick.body);
-          this.context.clearRect(
-            0,
-            0,
-            this.$refs.game.width,
-            this.$refs.game.height
-          );
-          this.context.fillRect(this.position.x, this.position.y, 20, 20);
-        });
+        this.stompClient.subscribe(
+          "/topic/location",
+          message => {
+            console.log(message);
+            message.ack();
+            // for (var i = 0; i < data.length; i++) {
+            //   this.context.fillRect(data[i].x, data[i].y, 20, 20);
+            // }
+          },
+          { ack: "client" }
+        );
       },
       error => {
         console.log(error);
@@ -74,11 +75,6 @@ export default {
         this.stompClient.disconnect();
       }
       this.connected = false;
-    },
-    intervalStart() {
-      setInterval(() => {
-        this.move();
-      }, 1);
     }
   }
 };
