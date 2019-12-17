@@ -1,8 +1,6 @@
 <template>
   <div>
-    <!-- <v-btn @click="move">Send</v-btn> -->
-    <v-btn @click="disconnect">Stop</v-btn>
-    <div id="log" style="font-size: 50px">{{ position }}</div>
+    <v-btn @click="connect">Connect</v-btn>
     <canvas
       ref="game"
       width="640"
@@ -28,55 +26,82 @@ export default {
   data() {
     return {
       connected: {},
-      snakes: {}
+      snakes: [],
+      direction: null
     };
-  },
-  created() {
-    this.socket = new SockJS("http://localhost:8090/snake");
-    this.stompClient = Stomp.over(this.socket);
-    this.stompClient.debug = function() {};
   },
   mounted() {
     this.context = this.$refs.game.getContext("2d");
-    this.stompClient.connect(
-      {},
-      () => {
-        this.connected = true;
-        this.stompClient.subscribe("/topic/location", this.onMessageReceived);
-      },
-      error => {
-        console.log(error);
-        this.connected = false;
-      }
-    );
+    this.context.fillStyle = "white";
+    this.context.fillRect(0, 0, 640, 480);
   },
   methods: {
-    move() {
-      if (this.stompClient && this.stompClient.connected) {
-        this.stompClient.send("/app/update", JSON.stringify(this.position), {});
-      }
-    },
-    draw() {
-      this.context.clearRect(
-        0,
-        0,
-        this.$refs.game.width,
-        this.$refs.game.length
+    connect() {
+      this.socket = new SockJS("http://localhost:8090/snake");
+      this.stompClient = Stomp.over(this.socket);
+      // this.stompClient.debug = function() {};
+      this.stompClient.connect(
+        {},
+        () => {
+          this.connected = true;
+          this.stompClient.subscribe("/topic/location", this.onMessageReceived);
+        },
+        error => {
+          console.log(error);
+          this.connected = false;
+        }
       );
+    },
+    addSnake(id, color) {
+      this.snakes.push({
+        id: id,
+        color: color
+      });
+    },
+    updateSnake(id, snakeBody) {
+      this.snakes.findIndex(snake => {
+        if (snake.id == id) {
+          snake.snakeBody = snakeBody;
+          this.draw();
+        }
+      });
+    },
+    removeSnake(id) {
+      let index = this.snakes.findIndex(x => x.id == id);
+      this.$delete(this.snakes, index);
     },
     onMessageReceived(payload) {
       var message = JSON.parse(payload.body);
-      if (message.type == "update") {
-        for (var i = 0; i < message.data.length; i++) {
-          // console.log(message.data[i].body[0].x);
-          // console.log(message.data[i].body[0].y);
-          this.context.fillRect(
-            message.data[i].body[0].x,
-            message.data[i].body[0].y,
-            20,
-            20
-          );
+      console.log(message.type);
+      switch (message.type) {
+        case "join": {
+          for (var j = 0; j < message.data.length; j++) {
+            this.addSnake(message.data[j].id, message.data[j].color);
+          }
+          break;
         }
+        case "update":
+          for (var i = 0; i < message.data.length; i++) {
+            this.updateSnake(message.data[i].id, message.data[i].body);
+          }
+          break;
+        case "leave": {
+          this.removeSnake(message.id);
+          break;
+        }
+      }
+    },
+    draw() {
+      this.context.clearRect(0, 0, 640, 480);
+      for (var j = 0; j < this.snakes.length; j++) {
+        console.log(this.snakes[j]);
+        this.context.fillStyle = this.snakes[j].color;
+        this.context.fillRect(
+          this.snakes[j].snakeBody[0].x,
+          this.snakes[j].snakeBody[0].y,
+          20,
+          20
+        );
       }
     },
     disconnect() {
@@ -87,6 +112,10 @@ export default {
     }
   }
 };
+
+// if (this.stompClient && this.stompClient.connected) {
+//   this.stompClient.send("/app/update", JSON.stringify(this.position), {});
+// }
 </script>
 
 <style scoped></style>

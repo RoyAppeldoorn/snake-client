@@ -1,10 +1,44 @@
 <template>
-  <v-app>
-    <v-app-bar app color="primary" dark></v-app-bar>
+  <v-app id="inspire">
+    <!-- <v-navigation-drawer v-model="drawer" app clipped>
+      <v-list dense>
+        <v-list-item link>
+          <v-list-item-action>
+            <v-icon>mdi-view-dashboard</v-icon>
+          </v-list-item-action>
+          <v-list-item-content>
+            <v-list-item-title>Dashboard</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+        <v-list-item link>
+          <v-list-item-action>
+            <v-icon>mdi-settings</v-icon>
+          </v-list-item-action>
+          <v-list-item-content>
+            <v-list-item-title>Settings</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+      </v-list>
+    </v-navigation-drawer> -->
+
+    <v-app-bar app clipped-left>
+      <v-app-bar-nav-icon @click.stop="drawer = !drawer" />
+      <v-toolbar-title>Application</v-toolbar-title>
+    </v-app-bar>
 
     <v-content>
-      <router-view />
+      <v-container class="fill-height" fluid>
+        <v-row align="center" justify="center">
+          <v-content align="center">
+            <router-view />
+          </v-content>
+        </v-row>
+      </v-container>
     </v-content>
+
+    <v-footer app>
+      <span>&copy; 2019</span>
+    </v-footer>
   </v-app>
 </template>
 
@@ -14,7 +48,13 @@ export default {
   name: "App",
 
   data: () => ({
-    //
+    items: [
+      { title: "Dashboard", icon: "mdi-view-dashboard" },
+      { title: "Photos", icon: "mdi-image" },
+      { title: "About", icon: "mdi-help-box" }
+    ],
+    right: null,
+    drawer: null
   })
 };
 </script>
