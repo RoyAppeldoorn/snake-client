@@ -3,10 +3,12 @@ import App from "./App.vue";
 import router from "./router";
 import store from "./store";
 import * as firebase from "firebase";
+import AlertComp from "@/components/shared/Alert.vue";
 
 import vuetify from "./plugins/vuetify";
 
 Vue.config.productionTip = false;
+Vue.component("app-alert", AlertComp);
 
 new Vue({
   router,
@@ -24,5 +26,6 @@ var firebaseConfig = {
   messagingSenderId: process.env.VUE_APP_FIREBASE_MESSAGING_SENDER_ID,
   appId: process.env.VUE_APP_FIREBASE_APP_ID
 };
+
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
