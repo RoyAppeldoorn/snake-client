@@ -23,7 +23,7 @@
 
     <v-app-bar app clipped-left>
       <v-app-bar-nav-icon @click.stop="drawer = !drawer" />
-      <v-toolbar-title>Application</v-toolbar-title>
+      <v-toolbar-title>{{ title }}</v-toolbar-title>
     </v-app-bar>
 
     <v-content>
@@ -54,7 +54,8 @@ export default {
       { title: "About", icon: "mdi-help-box" }
     ],
     right: null,
-    drawer: null
+    drawer: null,
+    title: process.env.VUE_APP_TITLE
   })
 };
 </script>
