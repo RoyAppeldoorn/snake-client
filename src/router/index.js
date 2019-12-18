@@ -1,8 +1,7 @@
 import Vue from "vue";
 import VueRouter from "vue-router";
 import Snake from "../views/Snake";
-import Signin from "@/components/auth/Signin.vue";
-import Register from "@/components/auth/Register.vue";
+import Signin from "@/views/Signin.vue";
 
 Vue.use(VueRouter);
 
@@ -13,14 +12,9 @@ const routes = [
     component: Snake
   },
   {
-    path: "/Signin",
+    path: "/signin",
     name: "signin",
     component: Signin
-  },
-  {
-    path: "/register",
-    name: "register",
-    component: Register
   }
 ];
 

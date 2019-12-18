@@ -8,7 +8,7 @@
       </v-col>
     </v-row>
     <v-row>
-      <v-col xs="12" sm="6" offset-sm="3">
+      <v-col xs="12" sm="6" align-self="start">
         <v-form ref="form" v-model="valid" lazy-validation>
           <v-text-field
             v-model="email"
