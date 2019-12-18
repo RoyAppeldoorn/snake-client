@@ -1,7 +1,14 @@
 <template>
   <v-container>
-    <v-layout row wrap>
-      <v-flex>
+    <v-row v-if="error">
+      <v-col xs="12" sm="6" offset-sm="3">
+        <app-alert @dismissed="onDismissed">
+          {{ error }}
+        </app-alert>
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col xs="12" sm="6" offset-sm="3">
         <v-form ref="form" v-model="valid" lazy-validation>
           <v-text-field
             v-model="email"
@@ -22,16 +29,23 @@
             @click:append="passwordShow = !passwordShow"
           ></v-text-field>
 
-          <v-btn :disabled="!valid" color="success" @click="validate">
-            Login
-          </v-btn>
+          <v-row justify="space-around">
+            <v-btn
+              :disabled="!valid"
+              color="primary"
+              @click="validate"
+              :loading="loading"
+            >
+              Sign in
+            </v-btn>
 
-          <v-btn color="error" @click="reset">
-            Reset Form
-          </v-btn>
+            <v-btn color="error" @click="reset">
+              Reset Form
+            </v-btn>
+          </v-row>
         </v-form>
-      </v-flex>
-    </v-layout>
+      </v-col>
+    </v-row>
   </v-container>
 </template>
 
@@ -48,10 +62,18 @@ export default {
     password: "",
     passwordRules: [v => !!v || "Password is Required"]
   }),
+  computed: {
+    error() {
+      return this.$store.getters.error;
+    },
+    loading() {
+      return this.$store.getters.loading;
+    }
+  },
   methods: {
     validate() {
       if (this.$refs.form.validate()) {
-        this.snackbar = true;
+        this.$store.dispatch("clearError", null);
         this.loginWithFirebase();
       }
     },
@@ -64,6 +86,9 @@ export default {
         password: this.password
       };
       this.$store.dispatch("signIn", user);
+    },
+    onDismissed() {
+      this.$store.dispatch("clearError", null);
     }
   }
 };
