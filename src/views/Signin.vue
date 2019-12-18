@@ -1,7 +1,7 @@
 <template>
   <v-container class="fill-height" fluid ma-0 pa-0>
     <v-col sm="6" class="pa-0 d-none d-sm-flex">
-      <v-img src="@/assets/snake.jpg" rel="preload" min-height="100vh"> </v-img>
+      <v-img src="@/assets/snake.jpg" rel="preload" min-height="100vh" />
     </v-col>
     <v-col xs="12" sm="6">
       <Signup />
