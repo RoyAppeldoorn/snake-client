@@ -1,16 +1,19 @@
 <template>
   <v-container>
     <v-row v-if="error">
-      <v-col xs="12" sm="6" offset-sm="3">
+      <v-col xs="12" sm="10" md="8" lg="6">
         <app-alert @dismissed="onDismissed">
           {{ error }}
         </app-alert>
       </v-col>
     </v-row>
     <v-row>
-      <v-col xs="12" sm="6" offset-sm="3">
+      <v-col xs="12" sm="10" md="8" lg="6" align-self="start">
         <v-form ref="form" v-model="valid" lazy-validation>
           <v-text-field
+            color="#88CD97"
+            single-line
+            outlined
             v-model="email"
             :rules="emailRules"
             label="E-mail"
@@ -18,6 +21,9 @@
           ></v-text-field>
 
           <v-text-field
+            color="#88CD97"
+            single-line
+            outlined
             v-model="password"
             :rules="passwordRules"
             label="Password"
@@ -29,18 +35,25 @@
             @click:append="passwordShow = !passwordShow"
           ></v-text-field>
 
-          <v-row justify="space-around">
+          <v-row
+            class="pa-0 ma-0"
+            justify="space-between"
+            align-content="center"
+          >
             <v-btn
               :disabled="!valid"
-              color="primary"
+              outlined
+              color="teal"
               @click="validate"
               :loading="loading"
             >
               Sign in
             </v-btn>
-
-            <v-btn color="error" @click="reset">
-              Reset Form
+            <span style="align-self: center">
+              OR
+            </span>
+            <v-btn text color="teal" @click="switchComponent('sign-up')">
+              Register
             </v-btn>
           </v-row>
         </v-form>
@@ -77,9 +90,6 @@ export default {
         this.loginWithFirebase();
       }
     },
-    reset() {
-      this.$refs.form.reset();
-    },
     loginWithFirebase() {
       const user = {
         email: this.email,
@@ -89,6 +99,9 @@ export default {
     },
     onDismissed() {
       this.$store.dispatch("clearError", null);
+    },
+    switchComponent(comp) {
+      this.$emit("switchComp", comp);
     }
   }
 };

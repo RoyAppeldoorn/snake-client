@@ -67,7 +67,7 @@
             <span style="align-self: center">
               OR
             </span>
-            <v-btn text color="teal">
+            <v-btn text color="teal" @click="switchComponent('sign-in')">
               Login
             </v-btn>
           </v-row>
@@ -79,6 +79,12 @@
 
 <script>
 export default {
+  props: {
+    currentComp: {
+      type: String,
+      required: true
+    }
+  },
   data: () => ({
     passwordShow: false,
     confirmPasswordShow: false,
@@ -122,6 +128,9 @@ export default {
     },
     onDismissed() {
       this.$store.dispatch("clearError", null);
+    },
+    switchComponent(comp) {
+      this.$emit("switchComp", comp);
     }
   }
 };

@@ -4,32 +4,20 @@
       <v-img src="@/assets/snake.jpg" rel="preload" min-height="100vh" />
     </v-col>
     <v-col xs="12" sm="6">
-      <component
-        :is="currentComponent"
-        @switchComp="switchComponent"
-      ></component>
+      <Signup />
     </v-col>
   </v-container>
 </template>
 
 <script>
-// import Signin from "@/components/auth/Signin.vue";
 import Signup from "@/components/auth/Signup.vue";
-import Signin from "@/components/auth/Signin.vue";
 
 export default {
   data: () => ({
-    publicPath: process.env.BASE_URL,
-    currentComponent: "sign-in"
+    publicPath: process.env.BASE_URL
   }),
   components: {
-    "sign-in": Signin,
-    "sign-up": Signup
-  },
-  methods: {
-    switchComponent: comp => {
-      this.currentComponent = comp;
-    }
+    Signup
   }
 };
 </script>
