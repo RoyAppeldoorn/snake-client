@@ -13,10 +13,12 @@ export default new Vuex.Store({
   mutations: {
     SET_USER_DATA(state, payload) {
       state.user = payload;
+      localStorage.setItem("user", JSON.stringify(payload));
     },
 
-    REMOVE_USER(state) {
-      state.user = null;
+    CLEAR_USER_DATA() {
+      localStorage.removeItem("user");
+      location.reload();
     },
 
     SET_LOADING(state, payload) {
@@ -35,7 +37,7 @@ export default new Vuex.Store({
         .createUserWithEmailAndPassword(payload.email, payload.password)
         .then(response => {
           console.log(response);
-          commit("SET_USER_DATA", response.user.uid);
+          commit("SET_USER_DATA", response.user);
           commit("SET_LOADING", false);
           commit("SET_ERROR", null);
         })
@@ -51,7 +53,7 @@ export default new Vuex.Store({
         .auth()
         .signInWithEmailAndPassword(payload.email, payload.password)
         .then(response => {
-          commit("SET_USER_DATA", response.user.uid);
+          commit("SET_USER_DATA", response.user);
           commit("SET_LOADING", false);
           commit("SET_ERROR", null);
         })
@@ -67,7 +69,7 @@ export default new Vuex.Store({
         .auth()
         .signOut()
         .then(() => {
-          commit("REMOVE_USER");
+          commit("CLEAR_USER_DATA");
           commit("SET_LOADING", false);
           commit("SET_ERROR", null);
         })
@@ -92,6 +94,10 @@ export default new Vuex.Store({
 
     error: state => {
       return state.error;
+    },
+
+    loggedIn: state => {
+      return !!state.user;
     }
   },
   modules: {}
