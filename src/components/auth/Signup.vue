@@ -33,7 +33,18 @@
             "
             :type="passwordShow ? 'text' : 'password'"
             @click:append="passwordShow = !passwordShow"
-          ></v-text-field>
+            loading
+          >
+            <template v-slot:progress>
+              <v-progress-linear
+                v-if="custom"
+                :value="progress"
+                :color="color"
+                height="7"
+                absolute
+              ></v-progress-linear>
+            </template>
+          </v-text-field>
 
           <v-text-field
             color="#88CD97"
@@ -67,8 +78,8 @@
             <span style="align-self: center">
               OR
             </span>
-            <v-btn text color="teal" @click="switchComponent('sign-in')">
-              Login
+            <v-btn text color="teal">
+              <router-link to="/signin">Login</router-link>
             </v-btn>
           </v-row>
         </v-form>
@@ -79,16 +90,11 @@
 
 <script>
 export default {
-  props: {
-    currentComp: {
-      type: String,
-      required: true
-    }
-  },
   data: () => ({
     passwordShow: false,
     confirmPasswordShow: false,
     valid: true,
+    custom: true,
     email: "",
     emailRules: [
       v => !!v || "E-mail is required",
@@ -111,6 +117,12 @@ export default {
     },
     loading() {
       return this.$store.getters.loading;
+    },
+    progress() {
+      return Math.min(100, this.password.length * 7);
+    },
+    color() {
+      return ["error", "warning", "success"][Math.floor(this.progress / 40)];
     }
   },
   methods: {
@@ -128,10 +140,13 @@ export default {
     },
     onDismissed() {
       this.$store.dispatch("clearError", null);
-    },
-    switchComponent(comp) {
-      this.$emit("switchComp", comp);
     }
   }
 };
 </script>
+
+<style lang="scss" scoped>
+a {
+  text-decoration: none;
+}
+</style>

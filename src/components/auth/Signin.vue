@@ -52,8 +52,8 @@
             <span style="align-self: center">
               OR
             </span>
-            <v-btn text color="teal" @click="switchComponent('sign-up')">
-              Register
+            <v-btn text color="teal">
+              <router-link to="/signup">Register</router-link>
             </v-btn>
           </v-row>
         </v-form>
@@ -99,10 +99,13 @@ export default {
     },
     onDismissed() {
       this.$store.dispatch("clearError", null);
-    },
-    switchComponent(comp) {
-      this.$emit("switchComp", comp);
     }
   }
 };
 </script>
+
+<style lang="scss" scoped>
+a {
+  text-decoration: none;
+}
+</style>
