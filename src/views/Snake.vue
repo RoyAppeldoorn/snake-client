@@ -1,21 +1,20 @@
 <template>
   <div>
     <GameBoard />
+
+    <BottomNavigation />
   </div>
 </template>
 
 <script>
 import GameBoard from "@/components/GameBoard.vue";
+import BottomNavigation from "@/components/layout/BottomNavigation.vue";
 
 export default {
-  data() {
-    return {
-      alignment: "center",
-      justify: "center"
-    };
-  },
+  data: () => ({}),
   components: {
-    GameBoard
+    GameBoard,
+    BottomNavigation
   }
 };
 </script>
