@@ -10,7 +10,8 @@ const routes = [
   {
     path: "/",
     name: "snake",
-    component: Snake
+    component: Snake,
+    meta: { requiresAuth: true }
   },
   {
     path: "/account",
@@ -39,6 +40,15 @@ const router = new VueRouter({
   mode: "history",
   base: process.env.BASE_URL,
   routes
+});
+
+router.beforeEach((to, from, next) => {
+  const loggedIn = localStorage.getItem("user");
+
+  if (to.matched.some(record => record.meta.requiresAuth) && !loggedIn) {
+    next("/signin");
+  }
+  next();
 });
 
 export default router;
