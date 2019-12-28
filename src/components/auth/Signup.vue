@@ -89,6 +89,8 @@
 </template>
 
 <script>
+import { authComputed } from "@/store/helpers.js";
+
 export default {
   data: () => ({
     passwordShow: false,
@@ -123,7 +125,8 @@ export default {
     },
     color() {
       return ["error", "warning", "success"][Math.floor(this.progress / 40)];
-    }
+    },
+    ...authComputed
   },
   methods: {
     validate() {
@@ -136,7 +139,9 @@ export default {
         email: this.email,
         password: this.password
       };
-      this.$store.dispatch("signUp", user);
+      this.$store.dispatch("signUp", user).then(() => {
+        this.$router.push({ name: "snake" });
+      });
     },
     onDismissed() {
       this.$store.dispatch("clearError", null);
