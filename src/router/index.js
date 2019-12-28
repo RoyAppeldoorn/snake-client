@@ -1,7 +1,8 @@
 import Vue from "vue";
 import VueRouter from "vue-router";
 import Snake from "../views/Snake";
-import Signin from "@/views/Signin.vue";
+import Signin from "@/components/auth/Signin.vue";
+import Signup from "@/components/auth/Signup.vue";
 
 Vue.use(VueRouter);
 
@@ -12,9 +13,25 @@ const routes = [
     component: Snake
   },
   {
-    path: "/signin",
-    name: "signin",
-    component: Signin
+    path: "/account",
+    component: () => import("@/views/Authentication.vue"),
+    children: [
+      {
+        path: "",
+        component: Signin
+      },
+      {
+        path: "signin",
+        alias: "/signin",
+        component: Signin
+      },
+      {
+        path: "signup",
+        alias: "/signup",
+        component: Signup,
+        meta: { transitionName: "slide" }
+      }
+    ]
   }
 ];
 
