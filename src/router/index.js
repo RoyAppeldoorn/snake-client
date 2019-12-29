@@ -18,10 +18,6 @@ const routes = [
     component: () => import("@/views/Authentication.vue"),
     children: [
       {
-        path: "",
-        component: Signin
-      },
-      {
         path: "signin",
         alias: "/signin",
         component: Signin

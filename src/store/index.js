@@ -1,6 +1,7 @@
 import Vue from "vue";
 import Vuex from "vuex";
 import firebase from "firebase";
+import router from "@/router/index.js";
 
 Vue.use(Vuex);
 
@@ -36,10 +37,10 @@ export default new Vuex.Store({
         .auth()
         .createUserWithEmailAndPassword(payload.email, payload.password)
         .then(response => {
-          console.log(response);
           commit("SET_USER_DATA", response.user);
           commit("SET_LOADING", false);
           commit("SET_ERROR", null);
+          router.push({ name: "snake" });
         })
         .catch(error => {
           commit("SET_ERROR", error.message);
@@ -56,6 +57,7 @@ export default new Vuex.Store({
           commit("SET_USER_DATA", response.user);
           commit("SET_LOADING", false);
           commit("SET_ERROR", null);
+          router.push({ name: "snake" });
         })
         .catch(error => {
           commit("SET_LOADING", false);
@@ -72,6 +74,7 @@ export default new Vuex.Store({
           commit("CLEAR_USER_DATA");
           commit("SET_LOADING", false);
           commit("SET_ERROR", null);
+          router.push({ name: "signin" });
         })
         .catch(error => {
           commit("SET_LOADING", false);

@@ -139,9 +139,7 @@ export default {
         email: this.email,
         password: this.password
       };
-      this.$store.dispatch("signUp", user).then(() => {
-        this.$router.push({ name: "snake" });
-      });
+      this.$store.dispatch("signUp", user);
     },
     onDismissed() {
       this.$store.dispatch("clearError", null);
