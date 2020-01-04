@@ -1,4 +1,4 @@
-<template>
+<!--<template>
   <v-bottom-navigation app class="align-center">
     <v-btn value="account" style="height: 100%">
       <span>Account</span>
@@ -18,6 +18,8 @@
 </template>
 
 <script>
+import Stomp from "webstomp-client";
+
 export default {
   data: () => ({}),
   methods: {
@@ -30,3 +32,4 @@ export default {
   }
 };
 </script>
+!-->

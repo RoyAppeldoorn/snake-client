@@ -7,15 +7,40 @@
       id="game"
       style="border:1px solid #000000;"
     ></canvas>
+
+    <v-bottom-navigation app class="align-center">
+      <v-btn value="account" style="height: 100%">
+        <span>Account</span>
+        <v-icon>mdi-account</v-icon>
+      </v-btn>
+
+      <v-btn
+        value="connect"
+        style="height: 100%"
+        @click="connect"
+        :disabled="connected"
+      >
+        <span>Connect</span>
+        <v-icon>mdi-power-plug</v-icon>
+      </v-btn>
+
+      <v-btn value="disconnect" style="height: 100%" @click="disconnect">
+        <span>Disconnect</span>
+        <v-icon>mdi-power-plug-off</v-icon>
+      </v-btn>
+    </v-bottom-navigation>
   </div>
 </template>
 
 <script>
+import SockJS from "sockjs-client";
+import Stomp from "webstomp-client";
+
 export default {
   name: "snakegame",
   data() {
     return {
-      connected: {},
+      connected: false,
       snakes: [],
       direction: null
     };
@@ -36,7 +61,6 @@ export default {
       this.snakes.findIndex(snake => {
         if (snake.id == id) {
           snake.snakeBody = snakeBody;
-          this.draw();
         }
       });
     },
@@ -58,6 +82,7 @@ export default {
           for (var i = 0; i < message.data.length; i++) {
             this.updateSnake(message.data[i].id, message.data[i].body);
           }
+          this.draw();
           break;
         case "leave": {
           this.removeSnake(message.id);
@@ -68,7 +93,6 @@ export default {
     draw() {
       this.context.clearRect(0, 0, 640, 480);
       for (var j = 0; j < this.snakes.length; j++) {
-        console.log(this.snakes[j]);
         this.context.fillStyle = this.snakes[j].color;
         this.context.fillRect(
           this.snakes[j].snakeBody[0].x,
@@ -77,6 +101,32 @@ export default {
           20
         );
       }
+    },
+    connect() {
+      this.socket = new SockJS("http://localhost:8090/snake");
+      this.stompClient = Stomp.over(this.socket);
+
+      this.stompClient.connect({}, this.onConnected, error => {
+        this.connected = false;
+        this.context.clearRect(0, 0, 640, 480);
+        alert(
+          "Verbinding met de websocket is verloren. Probeer opnieuw te connecten!"
+        );
+        console.log(error);
+      });
+    },
+    onConnected() {
+      this.connected = true;
+      this.stompClient.subscribe("/topic/public", this.onMessageReceived);
+
+      this.stompClient.send("/app/addUser", JSON.stringify("kenker"), {});
+    },
+    disconnect() {
+      if (this.stompClient) {
+        this.connected = false;
+        this.stompClient.disconnect();
+      }
+      this.$store.dispatch("signOut");
     }
   }
 };
