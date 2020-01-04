@@ -1,6 +1,5 @@
 <template>
   <div>
-    <v-btn @click="connect">Connect</v-btn>
     <canvas
       ref="game"
       width="640"
@@ -8,19 +7,10 @@
       id="game"
       style="border:1px solid #000000;"
     ></canvas>
-    <!-- <p>
-      <v-btn v-on:click="move('right')">Right</v-btn>
-      <v-btn v-on:click="move('left')">left</v-btn>
-      <v-btn v-on:click="move('up')">up</v-btn>
-      <v-btn v-on:click="move('down')">down</v-btn>
-    </p> -->
   </div>
 </template>
 
 <script>
-import SockJS from "sockjs-client";
-import Stomp from "webstomp-client";
-
 export default {
   name: "snakegame",
   data() {
@@ -36,22 +26,6 @@ export default {
     this.context.fillRect(0, 0, 640, 480);
   },
   methods: {
-    connect() {
-      this.socket = new SockJS("http://localhost:8090/snake");
-      this.stompClient = Stomp.over(this.socket);
-      // this.stompClient.debug = function() {};
-      this.stompClient.connect(
-        {},
-        () => {
-          this.connected = true;
-          this.stompClient.subscribe("/topic/location", this.onMessageReceived);
-        },
-        error => {
-          console.log(error);
-          this.connected = false;
-        }
-      );
-    },
     addSnake(id, color) {
       this.snakes.push({
         id: id,
@@ -103,12 +77,6 @@ export default {
           20
         );
       }
-    },
-    disconnect() {
-      if (this.stompClient) {
-        this.stompClient.disconnect();
-      }
-      this.connected = false;
     }
   }
 };
