@@ -1,16 +1,16 @@
 <template>
-  <v-bottom-navigation v-model="bottomNav" app>
-    <v-btn value="recent">
+  <v-bottom-navigation app class="align-center">
+    <v-btn value="account" style="height: 100%">
       <span>Account</span>
       <v-icon>mdi-account</v-icon>
     </v-btn>
 
-    <v-btn value="favorites">
-      <span>Spectate</span>
-      <v-icon>mdi-eye-outline</v-icon>
+    <v-btn value="connect" style="height: 100%" @click="connect">
+      <span>Connect</span>
+      <v-icon>mdi-power-plug</v-icon>
     </v-btn>
 
-    <v-btn value="nearby" @click="logout">
+    <v-btn value="disconnect" style="height: 100%" @click="disconnect">
       <span>Disconnect</span>
       <v-icon>mdi-power-plug-off</v-icon>
     </v-btn>
@@ -21,7 +21,10 @@
 export default {
   data: () => ({}),
   methods: {
-    logout() {
+    connect() {
+      this.$store.dispatch("connectToWebsocket");
+    },
+    disconnect() {
       this.$store.dispatch("signOut");
     }
   }
