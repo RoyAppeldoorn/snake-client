@@ -45,6 +45,32 @@ export default {
       direction: null
     };
   },
+  created() {
+    var self = this;
+    window.addEventListener(
+      "keydown",
+      function(e) {
+        var code = e.keyCode;
+        if (code > 36 && code < 41) {
+          switch (code) {
+            case 37:
+              if (self.direction != "EAST") self.setDirection("WEST");
+              break;
+            case 38:
+              if (self.direction != "SOUTH") self.setDirection("NORTH");
+              break;
+            case 39:
+              if (self.direction != "WEST") self.setDirection("EAST");
+              break;
+            case 40:
+              if (self.direction != "NORTH") self.setDirection("SOUTH");
+              break;
+          }
+        }
+      },
+      false
+    );
+  },
   mounted() {
     this.context = this.$refs.game.getContext("2d");
     this.context.fillStyle = "white";
@@ -68,9 +94,15 @@ export default {
       let index = this.snakes.findIndex(x => x.id == id);
       this.$delete(this.snakes, index);
     },
+    setDirection(direction) {
+      this.direction = direction;
+      this.stompClient.send("/app/setDirection", direction, {});
+    },
     onMessageReceived(payload) {
+      console.log(payload);
       var message = JSON.parse(payload.body);
       console.log(message.type);
+
       switch (message.type) {
         case "join": {
           for (var j = 0; j < message.data.length; j++) {
@@ -88,24 +120,35 @@ export default {
           this.removeSnake(message.id);
           break;
         }
+        case "dead":
+          console.log("Info: Your snake is dead, bad luck!");
+          break;
+        case "kill":
+          console.log("Info: Head shot!");
+          break;
       }
     },
     draw() {
       this.context.clearRect(0, 0, 640, 480);
       for (var j = 0; j < this.snakes.length; j++) {
         this.context.fillStyle = this.snakes[j].color;
-        this.context.fillRect(
-          this.snakes[j].snakeBody[0].x,
-          this.snakes[j].snakeBody[0].y,
-          20,
-          20
-        );
+
+        for (var i = 0; i < this.snakes[j].snakeBody.length; i++) {
+          this.context.strokeStyle = "black";
+          this.context.stroke();
+          this.context.fillRect(
+            this.snakes[j].snakeBody[i].x,
+            this.snakes[j].snakeBody[i].y,
+            20,
+            20
+          );
+        }
       }
     },
     connect() {
       this.socket = new SockJS("http://localhost:8090/snake");
       this.stompClient = Stomp.over(this.socket);
-
+      this.stompClient.debug = () => {};
       this.stompClient.connect({}, this.onConnected, error => {
         this.connected = false;
         this.context.clearRect(0, 0, 640, 480);
