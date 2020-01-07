@@ -43,7 +43,7 @@
             <v-btn
               :disabled="!valid"
               outlined
-              color="teal"
+              color="#88CD97"
               @click="validate"
               :loading="loading"
             >
@@ -52,9 +52,9 @@
             <span style="align-self: center">
               OR
             </span>
-            <v-btn text color="teal">
-              <router-link to="/signup">Register</router-link>
-            </v-btn>
+            <router-link to="/signup" style="color: #ffffff">
+              <v-btn text color="#">Register</v-btn></router-link
+            >
           </v-row>
         </v-form>
       </v-col>
