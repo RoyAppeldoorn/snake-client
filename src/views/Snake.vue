@@ -1,5 +1,5 @@
 <template>
-  <v-container class="fill-height">
+  <v-container fluid class="fill-height dark-bg">
     <v-row>
       <v-col cols="12" class="pa-0">
         <v-row align="center" justify="center">
@@ -21,4 +21,8 @@ export default {
 };
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.dark-bg {
+  background-color: #0c111e;
+}
+</style>
