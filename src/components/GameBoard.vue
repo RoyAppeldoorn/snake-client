@@ -1,13 +1,14 @@
 <template>
-  <div>
+  <div id="wrap">
     <canvas
       ref="game"
-      width="640"
-      height="480"
-      id="game"
-      style="border:1px solid #000000;"
+      width="1100"
+      height="900"
+      id="outer"
+      style="border:3px solid #ffffff;"
     ></canvas>
 
+    <chat :messages="received_messages" />
     <v-bottom-navigation app class="align-center">
       <v-btn value="account" style="height: 100%">
         <span>Account</span>
@@ -35,6 +36,8 @@
 <script>
 import SockJS from "sockjs-client";
 import Stomp from "webstomp-client";
+import Chat from "@/components/Chat.vue";
+import $ from "jquery";
 
 export default {
   name: "snakegame",
@@ -42,8 +45,12 @@ export default {
     return {
       connected: false,
       snakes: [],
-      direction: null
+      direction: null,
+      received_messages: []
     };
+  },
+  components: {
+    Chat
   },
   created() {
     var self = this;
@@ -73,14 +80,49 @@ export default {
   },
   mounted() {
     this.context = this.$refs.game.getContext("2d");
-    this.context.fillStyle = "white";
-    this.context.fillRect(0, 0, 640, 480);
+    this.clearCanvas(this.context);
+
+    var maxWidth = $("#outer").width();
+    var maxHeight = $("#outer").height();
+
+    $(window).resize(function() {
+      var $window = $(window);
+      var width = $window.width();
+      var height = $window.height();
+      var scale;
+
+      // early exit
+      if (width >= maxWidth && height >= maxHeight) {
+        $("#outer").css({ "-webkit-transform": "" });
+        $("#wrap").css({ width: "", height: "" });
+        return;
+      }
+
+      scale = Math.min(width / maxWidth, height / maxHeight);
+
+      $("#outer").css({ "-webkit-transform": "scale(" + scale + ")" });
+      $("#wrap").css({ width: maxWidth * scale, height: maxHeight * scale });
+    });
+  },
+  computed: {
+    canvasGradient() {
+      var grd = this.context.createLinearGradient(0, 0, 500, 500);
+      grd.addColorStop(0, "#151e39");
+      grd.addColorStop(0.12, "#092a42");
+      grd.addColorStop(0.5, "#092a42");
+      grd.addColorStop(0.82, "#092a42");
+      grd.addColorStop(1, "#032f44");
+      return grd;
+    }
   },
   methods: {
     addSnake(id, color) {
       this.snakes.push({
         id: id,
         color: color
+      });
+      this.received_messages.push({
+        message: "Hallo!"
       });
     },
     updateSnake(id, snakeBody) {
@@ -99,7 +141,6 @@ export default {
       this.stompClient.send("/app/setDirection", direction, {});
     },
     onMessageReceived(payload) {
-      console.log(payload);
       var message = JSON.parse(payload.body);
       console.log(message.type);
 
@@ -129,21 +170,29 @@ export default {
       }
     },
     draw() {
-      this.context.clearRect(0, 0, 640, 480);
+      this.clearCanvas(this.context);
       for (var j = 0; j < this.snakes.length; j++) {
         this.context.fillStyle = this.snakes[j].color;
-
         for (var i = 0; i < this.snakes[j].snakeBody.length; i++) {
-          this.context.strokeStyle = "black";
-          this.context.stroke();
           this.context.fillRect(
             this.snakes[j].snakeBody[i].x,
             this.snakes[j].snakeBody[i].y,
             20,
             20
           );
+          this.context.clearRect(
+            this.snakes[j].snakeBody[i].x + 2,
+            this.snakes[j].snakeBody[i].y + 2,
+            16,
+            16
+          );
         }
       }
+    },
+    clearCanvas(context) {
+      this.context.clearRect(0, 0, 1100, 900);
+      context.fillStyle = this.canvasGradient;
+      context.fillRect(0, 0, 1100, 900);
     },
     connect() {
       this.socket = new SockJS("http://localhost:8090/snake");
@@ -151,7 +200,7 @@ export default {
       this.stompClient.debug = () => {};
       this.stompClient.connect({}, this.onConnected, error => {
         this.connected = false;
-        this.context.clearRect(0, 0, 640, 480);
+        this.clearCanvas(this.context);
         alert(
           "Verbinding met de websocket is verloren. Probeer opnieuw te connecten!"
         );
@@ -179,4 +228,18 @@ export default {
 // }
 </script>
 
-<style scoped></style>
+<style scoped>
+#outer {
+  position: relative;
+  transform-origin: top left;
+  -webkit-transform-origin: top left;
+  width: 1100px;
+  height: 900px;
+}
+
+#wrap {
+  position: relative;
+  width: 1100px;
+  height: 900px;
+}
+</style>
