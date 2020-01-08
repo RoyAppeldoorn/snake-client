@@ -10,12 +10,16 @@ const apiClient = axios.create({
 });
 
 export default {
-  insertPlayer(player) {
-    apiClient.post("player", JSON.stringify(player), {
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json"
+  insertPlayer(id, name) {
+    return apiClient.post(
+      "player/create",
+      { player_id: id, nickname: name },
+      {
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json"
+        }
       }
-    });
+    );
   }
 };

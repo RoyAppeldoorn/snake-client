@@ -61,6 +61,16 @@
             @click:append="confirmPasswordShow = !confirmPasswordShow"
           ></v-text-field>
 
+          <v-text-field
+            color="#88CD97"
+            single-line
+            outlined
+            v-model="nickname"
+            label="Nickname"
+            :rules="nicknameRules"
+            required
+          ></v-text-field>
+
           <v-row
             class="pa-0 ma-0"
             justify="space-between"
@@ -105,6 +115,11 @@ export default {
     ],
     password: "",
     confirmPassword: "",
+    nickname: "",
+    nicknameRules: [
+      v => !!v || "Nickname Required",
+      v => v.length >= 6 || "Minimum Of 6 Charachters Is Required"
+    ],
     passwordRules: [
       v => !!v || "Password Required",
       v => v.length >= 6 || "Minimum Of 6 Charachters Is Required"
@@ -138,7 +153,8 @@ export default {
     registerWithFirebase() {
       const user = {
         email: this.email,
-        password: this.password
+        password: this.password,
+        nickname: this.nickname
       };
       this.$store.dispatch("signUp", user);
     },

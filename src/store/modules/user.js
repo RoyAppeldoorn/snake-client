@@ -1,5 +1,6 @@
 import firebase from "firebase";
 import router from "@/router/index.js";
+import PlayerService from "@/services/PlayerService.js";
 
 export default {
   state: {
@@ -29,7 +30,7 @@ export default {
     }
   },
   actions: {
-    signUp({ commit }, payload) {
+    signUp({ commit, dispatch }, payload) {
       commit("SET_LOADING", true);
       firebase
         .auth()
@@ -40,7 +41,15 @@ export default {
           commit("SET_USER_DATA", response.user.uid);
           commit("SET_LOADING", false);
           commit("SET_ERROR", null);
-          router.push({ name: "snake" });
+
+          var obj = {
+            player_id: response.user.uid,
+            nickname: payload.nickname
+          };
+
+          dispatch("insertInDatabase", {
+            obj
+          });
         })
         .catch(error => {
           commit("SET_ERROR", error.message);
@@ -82,6 +91,16 @@ export default {
         .catch(error => {
           commit("SET_LOADING", false);
           commit("SET_ERROR", error.message);
+        });
+    },
+
+    insertInDatabase({ commit }, payload) {
+      commit("SET_LOADING", true);
+      PlayerService.insertPlayer(payload.player_id, payload.nickname)
+        .then(() => router.push({ name: "snake" }))
+        .catch(error => {
+          commit("SET_ERROR", error.message);
+          commit("SET_LOADING", false);
         });
     },
 

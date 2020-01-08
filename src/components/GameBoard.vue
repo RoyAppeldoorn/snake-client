@@ -9,7 +9,7 @@
     ></canvas>
 
     <chat :messages="received_messages" />
-    <v-bottom-navigation app class="align-center">
+    <v-bottom-navigation app class="align-center bottom-nav-bg">
       <v-btn value="account" style="height: 100%">
         <span>Account</span>
         <v-icon>mdi-account</v-icon>
@@ -229,6 +229,10 @@ export default {
 </script>
 
 <style scoped>
+.bottom-nav-bg {
+  background-color: #131f2c !important;
+}
+
 #outer {
   position: relative;
   transform-origin: top left;
