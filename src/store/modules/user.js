@@ -1,10 +1,12 @@
 import firebase from "firebase";
 import router from "@/router/index.js";
 import PlayerService from "@/services/PlayerService.js";
+import Vue from "vue";
 
 export default {
   state: {
     user: null,
+    nickname: null,
     loading: null,
     error: null
   },
@@ -14,6 +16,13 @@ export default {
         uid: payload
       };
       localStorage.setItem("user", JSON.stringify(payload));
+    },
+
+    SET_NICKNAME(state, payload) {
+      state.nickname = payload;
+
+      Vue.set(state.user, "nickname", payload);
+      localStorage.setItem("user", JSON.stringify(state.user));
     },
 
     CLEAR_USER_DATA() {
@@ -39,16 +48,15 @@ export default {
           // // base-64 encoded ASCII string
           // btoa(response);
           commit("SET_USER_DATA", response.user.uid);
-          commit("SET_LOADING", false);
           commit("SET_ERROR", null);
 
-          var obj = {
+          var newUser = {
             player_id: response.user.uid,
             nickname: payload.nickname
           };
 
           dispatch("insertInDatabase", {
-            obj
+            newUser
           });
         })
         .catch(error => {
@@ -57,7 +65,7 @@ export default {
         });
     },
 
-    signIn({ commit }, payload) {
+    signIn({ commit, dispatch }, payload) {
       commit("SET_LOADING", true);
       firebase
         .auth()
@@ -67,6 +75,10 @@ export default {
           commit("SET_LOADING", false);
           commit("SET_ERROR", null);
           router.push({ name: "snake" });
+
+          dispatch("getPlayerFromDatabase", {
+            id: response.user.uid
+          });
         })
         .catch(error => {
           commit("SET_LOADING", false);
@@ -74,7 +86,7 @@ export default {
         });
     },
 
-    signOut({ commit, dispatch }) {
+    signOut({ commit }) {
       commit("SET_LOADING", true);
       firebase
         .auth()
@@ -83,9 +95,6 @@ export default {
           commit("CLEAR_USER_DATA");
           commit("SET_LOADING", false);
           commit("SET_ERROR", null);
-
-          dispatch("disconnectFromWebSocket");
-
           router.push({ name: "signin" });
         })
         .catch(error => {
@@ -94,13 +103,31 @@ export default {
         });
     },
 
-    insertInDatabase({ commit }, payload) {
-      commit("SET_LOADING", true);
-      PlayerService.insertPlayer(payload.player_id, payload.nickname)
-        .then(() => router.push({ name: "snake" }))
+    insertInDatabase({ commit, dispatch }, payload) {
+      PlayerService.insertPlayer(
+        payload.newUser.player_id,
+        payload.newUser.nickname
+      )
+        .then(() => {
+          router.push({ name: "snake" });
+
+          dispatch("getPlayerFromDatabase", {
+            id: payload.newUser.player_id
+          });
+        })
         .catch(error => {
           commit("SET_ERROR", error.message);
           commit("SET_LOADING", false);
+        });
+    },
+
+    getPlayerFromDatabase({ commit }, payload) {
+      PlayerService.getPlayer(payload.id)
+        .then(user => {
+          commit("SET_NICKNAME", user.data.nickname);
+        })
+        .catch(error => {
+          console.log(error);
         });
     },
 

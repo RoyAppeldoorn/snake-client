@@ -13,7 +13,8 @@ export default {
   insertPlayer(id, name) {
     return apiClient.post(
       "player/create",
-      { player_id: id, nickname: name },
+      // eslint-disable-next-line prettier/prettier
+      { "player_id": id, "nickname": name },
       {
         headers: {
           Accept: "application/json",
@@ -21,5 +22,14 @@ export default {
         }
       }
     );
+  },
+
+  getPlayer(id) {
+    return apiClient.get("player/" + id, {
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json"
+      }
+    });
   }
 };

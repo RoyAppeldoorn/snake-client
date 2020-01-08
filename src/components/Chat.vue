@@ -6,7 +6,7 @@
           <table id="conversation" class="table table-striped">
             <thead>
               <tr>
-                <th>Greetings</th>
+                <th>Players</th>
               </tr>
             </thead>
             <tbody>
