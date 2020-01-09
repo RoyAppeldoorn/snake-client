@@ -7,16 +7,20 @@
         </v-row>
       </v-col>
     </v-row>
+
+    <Sidebar />
   </v-container>
 </template>
 
 <script>
 import GameBoard from "@/components/GameBoard.vue";
+import Sidebar from "@/components/layout/Sidebar.vue";
 
 export default {
   data: () => ({}),
   components: {
-    GameBoard
+    GameBoard,
+    Sidebar
   }
 };
 </script>
