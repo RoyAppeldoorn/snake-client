@@ -8,8 +8,7 @@
       style="border:3px solid #ffffff;"
     ></canvas>
 
-    <chat :messages="received_messages" />
-    <v-bottom-navigation app class="align-center bottom-nav-bg">
+    <v-bottom-navigation class="align-center bottom-nav-bg">
       <v-btn value="account" style="height: 100%">
         <span>Account</span>
         <v-icon>mdi-account</v-icon>
@@ -36,7 +35,7 @@
 <script>
 import SockJS from "sockjs-client";
 import Stomp from "webstomp-client";
-import Chat from "@/components/Chat.vue";
+import { mapGetters } from "vuex";
 import $ from "jquery";
 
 export default {
@@ -48,9 +47,6 @@ export default {
       direction: null,
       received_messages: []
     };
-  },
-  components: {
-    Chat
   },
   created() {
     var self = this;
@@ -103,6 +99,8 @@ export default {
       $("#outer").css({ "-webkit-transform": "scale(" + scale + ")" });
       $("#wrap").css({ width: maxWidth * scale, height: maxHeight * scale });
     });
+
+    this.$store.dispatch("addToMessages", this.nickname);
   },
   computed: {
     canvasGradient() {
@@ -113,7 +111,10 @@ export default {
       grd.addColorStop(0.82, "#092a42");
       grd.addColorStop(1, "#032f44");
       return grd;
-    }
+    },
+    ...mapGetters({
+      nickname: "nickname"
+    })
   },
   methods: {
     addSnake(id, color) {
@@ -211,7 +212,11 @@ export default {
       this.connected = true;
       this.stompClient.subscribe("/topic/public", this.onMessageReceived);
 
-      this.stompClient.send("/app/addUser", JSON.stringify("kenker"), {});
+      this.stompClient.send(
+        "/app/addUser",
+        JSON.stringify(this.getNickname),
+        {}
+      );
     },
     disconnect() {
       if (this.stompClient) {
