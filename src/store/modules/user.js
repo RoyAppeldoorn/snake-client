@@ -1,7 +1,6 @@
 import firebase from "firebase";
 import router from "@/router/index.js";
 import PlayerService from "@/services/PlayerService.js";
-import Vue from "vue";
 
 export default {
   state: {
@@ -20,14 +19,16 @@ export default {
 
     SET_NICKNAME(state, payload) {
       state.nickname = payload;
-
-      Vue.set(state.user, "nickname", payload);
-      localStorage.setItem("user", JSON.stringify(state.user));
+      localStorage.setItem("nickname", JSON.stringify(payload));
     },
 
     CLEAR_USER_DATA() {
       localStorage.removeItem("user");
       location.reload();
+    },
+
+    CLEAR_NICKNAME() {
+      localStorage.removeItem("nickname");
     },
 
     SET_LOADING(state, payload) {
@@ -72,9 +73,7 @@ export default {
         .signInWithEmailAndPassword(payload.email, payload.password)
         .then(response => {
           commit("SET_USER_DATA", response.user.uid);
-          commit("SET_LOADING", false);
           commit("SET_ERROR", null);
-          router.push({ name: "snake" });
 
           dispatch("getPlayerFromDatabase", {
             id: response.user.uid
@@ -93,6 +92,7 @@ export default {
         .signOut()
         .then(() => {
           commit("CLEAR_USER_DATA");
+          commit("CLEAR_NICKNAME");
           commit("SET_LOADING", false);
           commit("SET_ERROR", null);
           router.push({ name: "signin" });
@@ -109,14 +109,13 @@ export default {
         payload.newUser.nickname
       )
         .then(() => {
-          router.push({ name: "snake" });
-
           dispatch("getPlayerFromDatabase", {
             id: payload.newUser.player_id
           });
         })
         .catch(error => {
-          commit("SET_ERROR", error.message);
+          console.log(error);
+          commit("SET_ERROR", "Something went wrong! Please try again later.");
           commit("SET_LOADING", false);
         });
     },
@@ -125,8 +124,12 @@ export default {
       PlayerService.getPlayer(payload.id)
         .then(user => {
           commit("SET_NICKNAME", user.data.nickname);
+          commit("SET_LOADING", false);
+          router.push({ name: "snake" });
         })
         .catch(error => {
+          commit("SET_ERROR", "Something went wrong! Please try again later.");
+          commit("SET_LOADING", false);
           console.log(error);
         });
     },
@@ -150,6 +153,12 @@ export default {
 
     loggedIn: state => {
       return !!state.user;
+    },
+
+    nickname: state => {
+      return state.nickname != null
+        ? state.nickname
+        : JSON.parse(localStorage.getItem("nickname"));
     }
   }
 };
