@@ -1,4 +1,4 @@
-# stomp-client
+# MpSnake client
 
 ## Project setup
 ```
