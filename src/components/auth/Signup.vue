@@ -90,7 +90,9 @@
             </span>
 
             <router-link to="/signin" style="color: #ffffff">
-              <v-btn text color="#">Login</v-btn></router-link
+              <v-btn text color="#" @click="onDismissed"
+                >Login</v-btn
+              ></router-link
             >
           </v-row>
         </v-form>
@@ -100,8 +102,6 @@
 </template>
 
 <script>
-import { authComputed } from "@/store/helpers.js";
-
 export default {
   data: () => ({
     passwordShow: false,
@@ -141,8 +141,7 @@ export default {
     },
     color() {
       return ["error", "warning", "success"][Math.floor(this.progress / 40)];
-    },
-    ...authComputed
+    }
   },
   methods: {
     validate() {

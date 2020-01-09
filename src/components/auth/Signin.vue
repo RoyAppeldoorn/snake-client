@@ -53,7 +53,9 @@
               OR
             </span>
             <router-link to="/signup" style="color: #ffffff">
-              <v-btn text color="#">Register</v-btn></router-link
+              <v-btn text color="#" @click="onDismissed"
+                >Register</v-btn
+              ></router-link
             >
           </v-row>
         </v-form>
