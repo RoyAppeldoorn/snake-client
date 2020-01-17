@@ -11,7 +11,6 @@ const apiClient = axios.create({
 
 export default {
   insertPlayer(id, name) {
-    console.log(id);
     return apiClient.post(
       "player/create",
       // eslint-disable-next-line prettier/prettier
@@ -26,10 +25,10 @@ export default {
   },
 
   insertStatistic(id) {
-    console.log(id);
     return apiClient.post(
       "statistics/create",
-      { player_id: id },
+      // eslint-disable-next-line prettier/prettier
+      { "player_id": id },
       {
         headers: {
           Accept: "application/json",

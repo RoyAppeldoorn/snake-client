@@ -51,13 +51,9 @@ export default {
           commit("SET_USER_DATA", response.user.uid);
           commit("SET_ERROR", null);
 
-          var newUser = {
+          dispatch("insertInDatabase", {
             player_id: response.user.uid,
             nickname: payload.nickname
-          };
-
-          dispatch("insertInDatabase", {
-            newUser
           });
         })
         .catch(error => {
@@ -66,7 +62,7 @@ export default {
         });
     },
 
-    signIn({ commit, dispatch }, payload) {
+    signIn({ commit }, payload) {
       commit("SET_LOADING", true);
       firebase
         .auth()
@@ -74,10 +70,8 @@ export default {
         .then(response => {
           commit("SET_USER_DATA", response.user.uid);
           commit("SET_ERROR", null);
-
-          dispatch("getPlayerFromDatabase", {
-            id: response.user.uid
-          });
+          commit("SET_LOADING", false);
+          router.push({ name: "snake" });
         })
         .catch(error => {
           commit("SET_LOADING", false);
@@ -104,13 +98,10 @@ export default {
     },
 
     insertInDatabase({ commit, dispatch }, payload) {
-      PlayerService.insertPlayer(
-        payload.newUser.player_id,
-        payload.newUser.nickname
-      )
+      PlayerService.insertPlayer(payload.player_id, payload.nickname)
         .then(() => {
-          dispatch("getPlayerFromDatabase", {
-            id: payload.newUser.player_id
+          dispatch("insertUserInStatistics", {
+            player_id: payload.player_id
           });
         })
         .catch(error => {
@@ -120,7 +111,20 @@ export default {
         });
     },
 
+    insertUserInStatistics({ commit }, payload) {
+      PlayerService.insertStatistic(payload.player_id)
+        .then(() => {
+          router.push({ name: "snake" });
+        })
+        .catch(error => {
+          console.log(error);
+          commit("SET_ERROR", "Something went wrong! Please try again later.");
+          commit("SET_LOADING", false);
+        });
+    },
+
     getPlayerFromDatabase({ commit }, payload) {
+      commit("SET_LOADING", true);
       PlayerService.getPlayer(payload.id)
         .then(user => {
           commit("SET_NICKNAME", user.data.nickname);
