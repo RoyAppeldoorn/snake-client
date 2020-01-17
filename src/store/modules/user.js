@@ -5,6 +5,7 @@ import PlayerService from "@/services/PlayerService.js";
 export default {
   state: {
     user: null,
+    nickname: null,
     loading: null,
     error: null
   },
@@ -16,9 +17,18 @@ export default {
       localStorage.setItem("user", JSON.stringify(payload));
     },
 
+    SET_NICKNAME(state, payload) {
+      state.nickname = payload;
+      localStorage.setItem("nickname", JSON.stringify(payload));
+    },
+
     CLEAR_USER_DATA() {
       localStorage.removeItem("user");
       location.reload();
+    },
+
+    CLEAR_NICKNAME() {
+      localStorage.removeItem("nickname");
     },
 
     SET_LOADING(state, payload) {
@@ -39,17 +49,15 @@ export default {
           // // base-64 encoded ASCII string
           // btoa(response);
           commit("SET_USER_DATA", response.user.uid);
-          commit("SET_LOADING", false);
           commit("SET_ERROR", null);
 
-          var obj = {
+          var newUser = {
             player_id: response.user.uid,
             nickname: payload.nickname
           };
-          console.log(obj);
 
-          dispatch("insertUserInDatabase", {
-            obj
+          dispatch("insertInDatabase", {
+            newUser
           });
         })
         .catch(error => {
@@ -58,16 +66,18 @@ export default {
         });
     },
 
-    signIn({ commit }, payload) {
+    signIn({ commit, dispatch }, payload) {
       commit("SET_LOADING", true);
       firebase
         .auth()
         .signInWithEmailAndPassword(payload.email, payload.password)
         .then(response => {
           commit("SET_USER_DATA", response.user.uid);
-          commit("SET_LOADING", false);
           commit("SET_ERROR", null);
-          router.push({ name: "snake" });
+
+          dispatch("getPlayerFromDatabase", {
+            id: response.user.uid
+          });
         })
         .catch(error => {
           commit("SET_LOADING", false);
@@ -75,18 +85,16 @@ export default {
         });
     },
 
-    signOut({ commit, dispatch }) {
+    signOut({ commit }) {
       commit("SET_LOADING", true);
       firebase
         .auth()
         .signOut()
         .then(() => {
           commit("CLEAR_USER_DATA");
+          commit("CLEAR_NICKNAME");
           commit("SET_LOADING", false);
           commit("SET_ERROR", null);
-
-          dispatch("disconnectFromWebSocket");
-
           router.push({ name: "signin" });
         })
         .catch(error => {
@@ -95,31 +103,34 @@ export default {
         });
     },
 
-    insertUserInDatabase({ commit, dispatch }, payload) {
-      commit("SET_LOADING", true);
-      console.log(payload);
-      console.log(payload.player_id);
-      PlayerService.insertPlayer(payload.player_id, payload.nickname)
+    insertInDatabase({ commit, dispatch }, payload) {
+      PlayerService.insertPlayer(
+        payload.newUser.player_id,
+        payload.newUser.nickname
+      )
         .then(() => {
-          dispatch("insertUserInStatistic", {
-            player_id: payload.player_id
+          dispatch("getPlayerFromDatabase", {
+            id: payload.newUser.player_id
           });
         })
         .catch(error => {
-          commit("SET_ERROR", error.message);
+          console.log(error);
+          commit("SET_ERROR", "Something went wrong! Please try again later.");
           commit("SET_LOADING", false);
         });
     },
 
-    insertUserInStatistic({ commit }, payload) {
-      console.log(payload.player_id);
-      PlayerService.insertStatistic(payload.player_id)
-        .then(() => {
+    getPlayerFromDatabase({ commit }, payload) {
+      PlayerService.getPlayer(payload.id)
+        .then(user => {
+          commit("SET_NICKNAME", user.data.nickname);
+          commit("SET_LOADING", false);
           router.push({ name: "snake" });
         })
         .catch(error => {
-          commit("SET_ERROR", error.message);
+          commit("SET_ERROR", "Something went wrong! Please try again later.");
           commit("SET_LOADING", false);
+          console.log(error);
         });
     },
 
@@ -142,6 +153,12 @@ export default {
 
     loggedIn: state => {
       return !!state.user;
+    },
+
+    nickname: state => {
+      return state.nickname != null
+        ? state.nickname
+        : JSON.parse(localStorage.getItem("nickname"));
     }
   }
 };
