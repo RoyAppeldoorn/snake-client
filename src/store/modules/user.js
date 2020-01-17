@@ -46,8 +46,9 @@ export default {
             player_id: response.user.uid,
             nickname: payload.nickname
           };
+          console.log(obj);
 
-          dispatch("insertInDatabase", {
+          dispatch("insertUserInDatabase", {
             obj
           });
         })
@@ -94,10 +95,28 @@ export default {
         });
     },
 
-    insertInDatabase({ commit }, payload) {
+    insertUserInDatabase({ commit, dispatch }, payload) {
       commit("SET_LOADING", true);
+      console.log(payload);
+      console.log(payload.player_id);
       PlayerService.insertPlayer(payload.player_id, payload.nickname)
-        .then(() => router.push({ name: "snake" }))
+        .then(() => {
+          dispatch("insertUserInStatistic", {
+            player_id: payload.player_id
+          });
+        })
+        .catch(error => {
+          commit("SET_ERROR", error.message);
+          commit("SET_LOADING", false);
+        });
+    },
+
+    insertUserInStatistic({ commit }, payload) {
+      console.log(payload.player_id);
+      PlayerService.insertStatistic(payload.player_id)
+        .then(() => {
+          router.push({ name: "snake" });
+        })
         .catch(error => {
           commit("SET_ERROR", error.message);
           commit("SET_LOADING", false);

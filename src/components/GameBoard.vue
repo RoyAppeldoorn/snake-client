@@ -142,6 +142,7 @@ export default {
     },
     onMessageReceived(payload) {
       var message = JSON.parse(payload.body);
+      console.log(message);
       console.log(message.type);
 
       switch (message.type) {
