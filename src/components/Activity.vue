@@ -7,7 +7,7 @@
     </thead>
     <tbody>
       <tr v-for="item in activity.messages" :key="item">
-        <td>{{ item }}</td>
+        <td v-bind:style="{ color: item.color }">{{ item.nickname }}</td>
       </tr>
     </tbody>
   </table>

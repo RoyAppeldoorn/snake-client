@@ -1,5 +1,10 @@
 <template>
   <div id="wrap">
+    <ul id="example-1">
+      <li v-for="snake in snakes" v-bind:key="snake.sessionId">
+        <p v-bind:style="{ color: snake.color }">{{ snake.points }}</p>
+      </li>
+    </ul>
     <canvas
       ref="game"
       width="1100"
@@ -8,7 +13,7 @@
       style="border:3px solid #ffffff;"
     ></canvas>
 
-    <v-bottom-navigation class="align-center bottom-nav-bg">
+    <v-bottom-navigation app class="align-center bottom-nav-bg">
       <v-btn value="account" style="height: 100%">
         <span>Account</span>
         <v-icon>mdi-account</v-icon>
@@ -36,6 +41,7 @@
 import SockJS from "sockjs-client";
 import Stomp from "webstomp-client";
 import { mapGetters } from "vuex";
+import firebase from "firebase";
 import $ from "jquery";
 
 export default {
@@ -73,6 +79,12 @@ export default {
       },
       false
     );
+
+    firebase.auth().onAuthStateChanged(function(user) {
+      if (user) {
+        self.$store.dispatch("getPlayerFromDatabase", { id: user.uid });
+      }
+    });
   },
   mounted() {
     this.context = this.$refs.game.getContext("2d");
@@ -99,8 +111,6 @@ export default {
       $("#outer").css({ "-webkit-transform": "scale(" + scale + ")" });
       $("#wrap").css({ width: maxWidth * scale, height: maxHeight * scale });
     });
-
-    this.$store.dispatch("addToMessages", this.nickname);
   },
   computed: {
     canvasGradient() {
@@ -112,29 +122,35 @@ export default {
       grd.addColorStop(1, "#032f44");
       return grd;
     },
-    ...mapGetters({
-      nickname: "nickname"
-    })
+    ...mapGetters(["nickname", "user"])
   },
   methods: {
-    addSnake(id, color) {
-      this.snakes.push({
-        id: id,
-        color: color
-      });
-      this.received_messages.push({
-        message: "Hallo!"
-      });
+    addSnake(sessionId, uuid, color, nickname, points) {
+      if (!this.snakes.some(snake => snake.sessionId == sessionId)) {
+        this.snakes.push({
+          sessionId: sessionId,
+          uuid: uuid,
+          color: color,
+          nickname: nickname,
+          points: points
+        });
+        this.$store.dispatch("addToMessages", {
+          nickname: nickname,
+          color: color
+        });
+      }
     },
-    updateSnake(id, snakeBody) {
+    updateSnake(sessionId, head, tail, points) {
       this.snakes.findIndex(snake => {
-        if (snake.id == id) {
-          snake.snakeBody = snakeBody;
+        if (snake.sessionId == sessionId) {
+          snake.head = head;
+          snake.tail = tail;
+          snake.points = points;
         }
       });
     },
-    removeSnake(id) {
-      let index = this.snakes.findIndex(x => x.id == id);
+    removeSnake(sessionId) {
+      let index = this.snakes.findIndex(x => x.sessionId == sessionId);
       this.$delete(this.snakes, index);
     },
     setDirection(direction) {
@@ -143,30 +159,40 @@ export default {
     },
     onMessageReceived(payload) {
       var message = JSON.parse(payload.body);
-      console.log(message);
-      console.log(message.type);
+      var content = JSON.parse(message.content);
 
       switch (message.type) {
-        case "join": {
-          for (var j = 0; j < message.data.length; j++) {
-            this.addSnake(message.data[j].id, message.data[j].color);
+        case "JOIN": {
+          for (var j = 0; j < content.length; j++) {
+            this.addSnake(
+              content[j].sessionId,
+              content[j].uuid,
+              content[j].hexColor,
+              content[j].nickname,
+              content[j].points
+            );
           }
           break;
         }
-        case "update":
-          for (var i = 0; i < message.data.length; i++) {
-            this.updateSnake(message.data[i].id, message.data[i].body);
+        case "UPDATE":
+          for (var i = 0; i < content.length; i++) {
+            this.updateSnake(
+              content[i].sessionId,
+              content[i].head,
+              content[i].tail,
+              content[i].points
+            );
           }
           this.draw();
           break;
-        case "leave": {
-          this.removeSnake(message.id);
+        case "LEAVE": {
+          this.removeSnake(content);
           break;
         }
-        case "dead":
+        case "DEAD":
           console.log("Info: Your snake is dead, bad luck!");
           break;
-        case "kill":
+        case "KILL":
           console.log("Info: Head shot!");
           break;
       }
@@ -174,17 +200,30 @@ export default {
     draw() {
       this.clearCanvas(this.context);
       for (var j = 0; j < this.snakes.length; j++) {
+        console.log(this.snakes[j]);
         this.context.fillStyle = this.snakes[j].color;
-        for (var i = 0; i < this.snakes[j].snakeBody.length; i++) {
+        this.context.fillRect(
+          this.snakes[j].head.x,
+          this.snakes[j].head.y,
+          20,
+          20
+        );
+        this.context.clearRect(
+          this.snakes[j].head.x + 2,
+          this.snakes[j].head.y + 2,
+          16,
+          16
+        );
+        for (var i = 0; i < this.snakes[j].tail.length; i++) {
           this.context.fillRect(
-            this.snakes[j].snakeBody[i].x,
-            this.snakes[j].snakeBody[i].y,
+            this.snakes[j].tail[i].x,
+            this.snakes[j].tail[i].y,
             20,
             20
           );
           this.context.clearRect(
-            this.snakes[j].snakeBody[i].x + 2,
-            this.snakes[j].snakeBody[i].y + 2,
+            this.snakes[j].tail[i].x + 2,
+            this.snakes[j].tail[i].y + 2,
             16,
             16
           );
@@ -212,10 +251,12 @@ export default {
     onConnected() {
       this.connected = true;
       this.stompClient.subscribe("/topic/public", this.onMessageReceived);
-
       this.stompClient.send(
         "/app/addUser",
-        JSON.stringify(this.getNickname),
+        JSON.stringify({
+          nickname: this.nickname,
+          uuid: this.user
+        }),
         {}
       );
     },
@@ -228,10 +269,6 @@ export default {
     }
   }
 };
-
-// if (this.stompClient && this.stompClient.connected) {
-//   this.stompClient.send("/app/update", JSON.stringify(this.position), {});
-// }
 </script>
 
 <style scoped>

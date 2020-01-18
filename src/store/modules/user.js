@@ -51,9 +51,13 @@ export default {
           commit("SET_USER_DATA", response.user.uid);
           commit("SET_ERROR", null);
 
-          dispatch("insertInDatabase", {
+          var newUser = {
             player_id: response.user.uid,
             nickname: payload.nickname
+          };
+
+          dispatch("insertInDatabase", {
+            newUser
           });
         })
         .catch(error => {
@@ -70,7 +74,6 @@ export default {
         .then(response => {
           commit("SET_USER_DATA", response.user.uid);
           commit("SET_ERROR", null);
-          commit("SET_LOADING", false);
           router.push({ name: "snake" });
         })
         .catch(error => {
@@ -97,22 +100,11 @@ export default {
         });
     },
 
-    insertInDatabase({ commit, dispatch }, payload) {
-      PlayerService.insertPlayer(payload.player_id, payload.nickname)
-        .then(() => {
-          dispatch("insertUserInStatistics", {
-            player_id: payload.player_id
-          });
-        })
-        .catch(error => {
-          console.log(error);
-          commit("SET_ERROR", "Something went wrong! Please try again later.");
-          commit("SET_LOADING", false);
-        });
-    },
-
-    insertUserInStatistics({ commit }, payload) {
-      PlayerService.insertStatistic(payload.player_id)
+    insertInDatabase({ commit }, payload) {
+      PlayerService.insertPlayer(
+        payload.newUser.player_id,
+        payload.newUser.nickname
+      )
         .then(() => {
           router.push({ name: "snake" });
         })
@@ -124,12 +116,10 @@ export default {
     },
 
     getPlayerFromDatabase({ commit }, payload) {
-      commit("SET_LOADING", true);
       PlayerService.getPlayer(payload.id)
         .then(user => {
           commit("SET_NICKNAME", user.data.nickname);
           commit("SET_LOADING", false);
-          router.push({ name: "snake" });
         })
         .catch(error => {
           commit("SET_ERROR", "Something went wrong! Please try again later.");
@@ -148,7 +138,9 @@ export default {
     },
 
     user: state => {
-      return state.user;
+      return state.user != null
+        ? state.user
+        : JSON.parse(localStorage.getItem("user"));
     },
 
     error: state => {
