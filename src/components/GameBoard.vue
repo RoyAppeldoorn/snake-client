@@ -200,7 +200,6 @@ export default {
     draw() {
       this.clearCanvas(this.context);
       for (var j = 0; j < this.snakes.length; j++) {
-        console.log(this.snakes[j]);
         this.context.fillStyle = this.snakes[j].color;
         this.context.fillRect(
           this.snakes[j].head.x,
@@ -255,7 +254,7 @@ export default {
         "/app/addUser",
         JSON.stringify({
           nickname: this.nickname,
-          uuid: this.user
+          uuid: this.user.uid
         }),
         {}
       );
