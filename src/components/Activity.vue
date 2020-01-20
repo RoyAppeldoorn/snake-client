@@ -6,8 +6,10 @@
       </tr>
     </thead>
     <tbody>
-      <tr v-for="item in activity.messages" :key="item">
-        <td v-bind:style="{ color: item.color }">{{ item.nickname }}</td>
+      <tr v-for="item in activity.players" :key="item.sessionId">
+        <td v-bind:style="{ color: item.color }">
+          {{ item.nickname }} {{ item.points }}
+        </td>
       </tr>
     </tbody>
   </table>

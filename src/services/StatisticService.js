@@ -10,11 +10,10 @@ const apiClient = axios.create({
 });
 
 export default {
-  insertPlayer(id, name) {
+  updatePlayerKills(id) {
     return apiClient.post(
-      "player/create",
+      "statistics/" + id + "/kill",
       // eslint-disable-next-line prettier/prettier
-      { "player_id": id, "nickname": name },
       {
         headers: {
           Accept: "application/json",
@@ -24,8 +23,21 @@ export default {
     );
   },
 
-  getPlayer(id) {
-    return apiClient.get("player/" + id, {
+  updatePlayerDeads(id) {
+    return apiClient.post(
+      "statistics/" + id + "/dead",
+      // eslint-disable-next-line prettier/prettier
+      {
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json"
+        }
+      }
+    );
+  },
+
+  getStatistic(id) {
+    return apiClient.get("statistic/" + id, {
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json"

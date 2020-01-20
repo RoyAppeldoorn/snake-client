@@ -1,10 +1,5 @@
 <template>
   <div id="wrap">
-    <ul id="example-1">
-      <li v-for="snake in snakes" v-bind:key="snake.sessionId">
-        <p v-bind:style="{ color: snake.color }">{{ snake.points }}</p>
-      </li>
-    </ul>
     <canvas
       ref="game"
       width="1100"
@@ -29,8 +24,8 @@
         <v-icon>mdi-power-plug</v-icon>
       </v-btn>
 
-      <v-btn value="disconnect" style="height: 100%" @click="disconnect">
-        <span>Disconnect</span>
+      <v-btn value="logout" style="height: 100%" @click="logout">
+        <span>logout</span>
         <v-icon>mdi-power-plug-off</v-icon>
       </v-btn>
     </v-bottom-navigation>
@@ -51,7 +46,9 @@ export default {
       connected: false,
       snakes: [],
       direction: null,
-      received_messages: []
+      received_messages: [],
+      context: null,
+      points: 0
     };
   },
   created() {
@@ -88,7 +85,7 @@ export default {
   },
   mounted() {
     this.context = this.$refs.game.getContext("2d");
-    this.clearCanvas(this.context);
+    this.clearCanvas();
 
     var maxWidth = $("#outer").width();
     var maxHeight = $("#outer").height();
@@ -134,7 +131,8 @@ export default {
           nickname: nickname,
           points: points
         });
-        this.$store.dispatch("addToMessages", {
+        this.$store.dispatch("addToPlayers", {
+          sessionId: sessionId,
           nickname: nickname,
           color: color
         });
@@ -146,6 +144,10 @@ export default {
           snake.head = head;
           snake.tail = tail;
           snake.points = points;
+          this.$store.dispatch("updatePoints", {
+            sessionId: snake.sessionId,
+            points: snake.points
+          });
         }
       });
     },
@@ -187,18 +189,34 @@ export default {
           break;
         case "LEAVE": {
           this.removeSnake(content);
+          this.$store.dispatch("removeFromPlayers", content);
           break;
         }
         case "DEAD":
-          console.log("Info: Your snake is dead, bad luck!");
+          console.log(
+            "Info: Your snake is dead, bad luck! " + content.nickname
+          );
+          this.$store.dispatch("updatePlayerDeads", content.uuid);
           break;
         case "KILL":
-          console.log("Info: Head shot!");
+          console.log("Info: Head shot! " + content.nickname + " got a kill");
+          this.$store.dispatch("updatePlayerKills", content.uuid);
+          break;
+        case "ROUND_OVER":
+          console.log("Info: Round over!");
+          break;
+        case "GAME_OVER":
+          console.log("Info: Game over!");
+          while (this.snakes.length) {
+            this.snakes.pop();
+          }
+          this.clearCanvas();
+          this.disconnect();
           break;
       }
     },
     draw() {
-      this.clearCanvas(this.context);
+      this.clearCanvas();
       for (var j = 0; j < this.snakes.length; j++) {
         this.context.fillStyle = this.snakes[j].color;
         this.context.fillRect(
@@ -229,10 +247,10 @@ export default {
         }
       }
     },
-    clearCanvas(context) {
+    clearCanvas() {
       this.context.clearRect(0, 0, 1100, 900);
-      context.fillStyle = this.canvasGradient;
-      context.fillRect(0, 0, 1100, 900);
+      this.context.fillStyle = this.canvasGradient;
+      this.context.fillRect(0, 0, 1100, 900);
     },
     connect() {
       this.socket = new SockJS("http://localhost:8090/snake");
@@ -254,7 +272,7 @@ export default {
         "/app/addUser",
         JSON.stringify({
           nickname: this.nickname,
-          uuid: this.user.uid
+          uuid: this.user
         }),
         {}
       );
@@ -264,6 +282,8 @@ export default {
         this.connected = false;
         this.stompClient.disconnect();
       }
+    },
+    logout() {
       this.$store.dispatch("signOut");
     }
   }
