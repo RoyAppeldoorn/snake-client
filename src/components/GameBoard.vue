@@ -210,6 +210,7 @@ export default {
           while (this.snakes.length) {
             this.snakes.pop();
           }
+          this.$store.dispatch("clearPlayers");
           this.clearCanvas();
           this.disconnect();
           break;

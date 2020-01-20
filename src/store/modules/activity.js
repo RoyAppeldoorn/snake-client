@@ -21,6 +21,9 @@ export default {
         x => x.sessionId == payload.sessionId
       );
       Vue.set(state.players[index], "points", payload.points);
+    },
+    CLEAR_PLAYERS(state) {
+      state.players = [];
     }
   },
   actions: {
@@ -32,6 +35,9 @@ export default {
     },
     updatePoints({ commit }, payload) {
       commit("ADD_POINT", payload);
+    },
+    clearPlayers({ commit }) {
+      commit("CLEAR_PLAYERS");
     }
   },
   getters: {

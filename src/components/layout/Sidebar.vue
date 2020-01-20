@@ -1,5 +1,5 @@
 <template>
-  <v-navigation-drawer app class="dark-bg">
+  <v-navigation-drawer app class="dark-bg" fixed permanent>
     <div id="main-content" class="container">
       <div class="row">
         <div class="col-md-12">
