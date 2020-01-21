@@ -31,7 +31,6 @@ export default {
       StatisticService.updatePlayerDeads(payload)
         .then(() => {
           commit("SET_LOADING", false);
-          console.log("DONE2");
         })
         .catch(error => {
           commit("SET_LOADING", false);
@@ -42,8 +41,8 @@ export default {
       commit("SET_STATISTIC_LOADING", true);
       StatisticService.getStatistic(payload)
         .then(statistic => {
+          commit("SET_STATISTIC", statistic.data);
           commit("SET_LOADING", false);
-          commit("SET_STATISTIC", statistic);
         })
         .catch(error => {
           commit("SET_LOADING", false);

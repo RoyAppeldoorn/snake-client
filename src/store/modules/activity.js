@@ -2,7 +2,8 @@ import Vue from "vue";
 
 export default {
   state: {
-    players: []
+    players: [],
+    sessionId: null
   },
   mutations: {
     ADD_PLAYER(state, payload) {
@@ -24,11 +25,15 @@ export default {
     },
     CLEAR_PLAYERS(state) {
       state.players = [];
+    },
+    SET_SESSION_ID(state, payload) {
+      state.sessionId = payload;
     }
   },
   actions: {
     addToPlayers({ commit }, payload) {
       commit("ADD_PLAYER", payload);
+      commit("SET_SESSION_ID", payload.sessionId);
     },
     removeFromPlayers({ commit }, payload) {
       commit("REMOVE_PLAYER", payload);
@@ -43,6 +48,9 @@ export default {
   getters: {
     players: state => {
       return state.players;
+    },
+    sessionId: state => {
+      return state.sessionId;
     }
   }
 };

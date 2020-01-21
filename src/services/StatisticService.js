@@ -37,7 +37,7 @@ export default {
   },
 
   getStatistic(id) {
-    return apiClient.get("statistic/" + id, {
+    return apiClient.get("statistics/" + id, {
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json"

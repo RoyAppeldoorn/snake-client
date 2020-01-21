@@ -11,9 +11,7 @@ export default {
   },
   mutations: {
     SET_USER_DATA(state, payload) {
-      state.user = {
-        uid: payload
-      };
+      state.user = payload;
       localStorage.setItem("user", JSON.stringify(payload));
     },
 

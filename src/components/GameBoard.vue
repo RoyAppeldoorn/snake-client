@@ -1,5 +1,6 @@
 <template>
   <div id="wrap">
+    <statisticsmodal v-model="dialog" />
     <canvas
       ref="game"
       width="1100"
@@ -9,7 +10,14 @@
     ></canvas>
 
     <v-bottom-navigation app class="align-center bottom-nav-bg">
-      <v-btn value="account" style="height: 100%">
+      <v-btn
+        value="account"
+        style="height: 100%"
+        @click="
+          dialog = true;
+          fetchStatistics();
+        "
+      >
         <span>Account</span>
         <v-icon>mdi-account</v-icon>
       </v-btn>
@@ -38,6 +46,7 @@ import Stomp from "webstomp-client";
 import { mapGetters } from "vuex";
 import firebase from "firebase";
 import $ from "jquery";
+import statisticsmodal from "@/components/statistics/statisticsmodal.vue";
 
 export default {
   name: "snakegame",
@@ -48,8 +57,12 @@ export default {
       direction: null,
       received_messages: [],
       context: null,
-      points: 0
+      points: 0,
+      dialog: false
     };
+  },
+  components: {
+    statisticsmodal
   },
   created() {
     var self = this;
@@ -122,19 +135,21 @@ export default {
     ...mapGetters(["nickname", "user"])
   },
   methods: {
-    addSnake(sessionId, uuid, color, nickname, points) {
+    addSnake(sessionId, uuid, color, nickname, points, roomMaster) {
       if (!this.snakes.some(snake => snake.sessionId == sessionId)) {
         this.snakes.push({
           sessionId: sessionId,
           uuid: uuid,
           color: color,
           nickname: nickname,
-          points: points
+          points: points,
+          roomMaster: roomMaster
         });
         this.$store.dispatch("addToPlayers", {
           sessionId: sessionId,
           nickname: nickname,
-          color: color
+          color: color,
+          roomMaster: roomMaster
         });
       }
     },
@@ -171,7 +186,8 @@ export default {
               content[j].uuid,
               content[j].hexColor,
               content[j].nickname,
-              content[j].points
+              content[j].points,
+              content[j].roomMaster
             );
           }
           break;
@@ -277,6 +293,9 @@ export default {
         }),
         {}
       );
+    },
+    fetchStatistics() {
+      this.$store.dispatch("getStatistic", this.user);
     },
     disconnect() {
       if (this.stompClient) {
