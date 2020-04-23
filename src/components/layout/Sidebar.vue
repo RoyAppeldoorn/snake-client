@@ -1,5 +1,5 @@
 <template>
-  <v-navigation-drawer app class="dark-bg" fixed permanent>
+  <v-navigation-drawer app class="dark-bg">
     <div id="main-content" class="container">
       <div class="row">
         <div class="col-md-12">
@@ -11,13 +11,13 @@
 </template>
 
 <script>
-import Activity from "@/components/Activity.vue";
+import Activity from '@/components/Activity.vue'
 
 export default {
   components: {
-    Activity
-  }
-};
+    Activity,
+  },
+}
 </script>
 
 <style lang="scss" scoped>
