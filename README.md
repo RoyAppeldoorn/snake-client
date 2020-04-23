@@ -15,6 +15,8 @@ Vuesnake is a Vue.js based multiplayer snake game, using websockets as the commu
 * Snake can travel through walls. 
 * Game keeps count of the points. 
 
+![C1 model](demo/C1.jpg "C1 model")
+
 ## Registration
 
 ![Registration](demo/snake_registration.gif)
